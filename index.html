@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAUU News Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        dark: { bg: '#0a0a0a', card: '#171717', input: '#262626' },
+                        accent: { primary: '#6366f1', secondary: '#8b5cf6' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Background */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: -1;
+            opacity: 0.25;
+            animation: float 25s infinite cubic-bezier(0.4, 0, 0.2, 1) alternate;
+        }
+
+        body::before {
+            background: #4f46e5;
+            top: -15%;
+            left: -15%;
+        }
+
+        body::after {
+            background: #9333ea;
+            bottom: -15%;
+            right: -15%;
+            animation-delay: -12s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(30px, 30px);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-entry {
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        .animate-slideDown {
+            animation: slideDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(30, 30, 30, 0.8);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.2);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-input:focus {
+            background: rgba(0, 0, 0, 0.6);
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+
+        /* Story Reel */
+        .story-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            padding-top: 10px;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .story-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .story-card {
+            flex: 0 0 auto;
+            width: 140px;
+            height: 250px;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .story-card:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border-color: rgba(99, 102, 241, 0.4);
+            z-index: 10;
+        }
+
+        .story-card:hover img.story-bg {
+            transform: scale(1.1);
+        }
+
+        .story-card img.story-bg {
+            transition: transform 0.5s ease;
+        }
+
+        /* Create Story Specifics */
+        .create-story-card {
+            background: rgba(30, 30, 30, 0.8);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .create-story-img-container {
+            height: 65%;
+            width: 100%;
+            overflow: hidden;
+            background: #1f1f1f;
+        }
+
+        .create-story-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .create-story-card:hover .create-story-img-container img {
+            transform: scale(1.1);
+        }
+
+        .create-btn-area {
+            height: 35%;
+            background: rgba(20, 20, 20, 0.9);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 15px;
+        }
+
+        .plus-icon {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #6366f1;
+            border: 4px solid #1a1a1a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: transform 0.3s;
+            z-index: 20;
+        }
+
+        .create-story-card:hover .plus-icon {
+            transform: translateX(-50%) scale(1.1) rotate(90deg);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        #userSidebar {
+            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden selection:bg-accent-primary selection:text-white">
+
+    <nav
+        class="h-16 border-b border-white/5 bg-dark-bg/60 backdrop-blur-md flex items-center justify-between px-6 z-50 relative glass animate-slideDown">
+        <div class="flex items-center gap-4">
+            <button onclick="toggleUserTray()" id="toggleTrayBtn"
+                class="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 active:scale-95">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+            <div class="flex items-center gap-3 group cursor-pointer">
+                <img src="/static/logo.png" alt="NAUU Logo"
+                    class="w-10 h-10 rounded-xl shadow-lg shadow-accent-primary/20 transition-transform group-hover:rotate-12 duration-500">
+                <h1 class="text-xl font-bold tracking-tight text-white">NAUU <span
+                        class="text-accent-primary group-hover:text-accent-secondary transition-colors">News</span></h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative group">
+                <input type="text" id="searchInput" placeholder="Search stories..."
+                    class="glass-input text-sm rounded-full px-4 py-2 w-64 focus:w-80 transition-all duration-500 ease-out focus:border-accent-primary focus:outline-none text-gray-300 placeholder-gray-500">
+                <svg class="w-4 h-4 absolute right-3 top-3 text-gray-500 group-focus-within:text-accent-primary transition-colors"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+            {% if current_user.is_authenticated %}
+            <div class="flex items-center gap-3 animate-entry" style="animation-delay: 0.2s">
+                <div class="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+                    <img src="" id="navbarAvatar" alt="User" class="w-full h-full object-cover">
+                </div>
+                <span class="text-sm text-gray-300 hidden md:inline">Hi, <span class="font-bold text-white">{{
+                        current_user.username }}</span></span>
+                <button onclick="openUserModal({{ current_user.id }})"
+                    class="ml-2 bg-white/5 hover:bg-white/10 hover:shadow-lg hover:shadow-accent-primary/20 text-white px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 border border-white/5 hover:-translate-y-0.5">Profile</button>
+                <button onclick="logout()"
+                    class="text-gray-400 hover:text-red-400 p-2 transition-all hover:rotate-90 duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <aside id="userSidebar"
+            class="w-80 glass border-r border-white/5 flex flex-col absolute inset-y-0 left-0 z-40 transform -translate-x-full shadow-2xl backdrop-blur-xl">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+                <h2 class="font-bold text-gray-300 uppercase text-xs tracking-wider">Community</h2>
+                <button onclick="toggleUserTray()"
+                    class="text-gray-500 hover:text-white transition-transform hover:rotate-90 duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-2" id="userList"></div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8 relative scroll-smooth">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-8 animate-entry">
+                    <div id="storiesReel" class="story-container"></div>
+                </div>
+
+                <div class="flex gap-2 mb-8 overflow-x-auto pb-2 animate-entry" style="animation-delay: 0.1s;">
+                    <button onclick="setFilter('All')" id="btn-All"
+                        class="px-4 py-1.5 rounded-full bg-accent-primary/20 text-accent-primary text-xs font-bold border border-accent-primary/20 transition-all duration-300 active:scale-95 backdrop-blur-md shadow-lg shadow-accent-primary/10">All</button>
+                    <button onclick="setFilter('Tech')" id="btn-Tech"
+                        class="px-4 py-1.5 rounded-full glass text-gray-400 text-xs font-bold border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 active:scale-95">Tech</button>
+                    <button onclick="setFilter('Design')" id="btn-Design"
+                        class="px-4 py-1.5 rounded-full glass text-gray-400 text-xs font-bold border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 active:scale-95">Design</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="newsFeed"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="switchUserModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
+            onclick="closeSwitchModal()"></div>
+        <div class="glass w-full max-w-sm p-6 rounded-2xl relative z-10 animate-entry">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Switch Account</h3>
+                <button onclick="closeSwitchModal()" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex flex-col items-center mb-6">
+                <div class="w-20 h-20 rounded-full border-2 border-accent-primary p-1 mb-3">
+                    <img id="switchUserAvatar" src="" class="w-full h-full rounded-full object-cover">
+                </div>
+                <p class="text-gray-400 text-sm">Enter password for <span id="switchTargetUser"
+                        class="text-accent-primary font-bold text-base"></span></p>
+            </div>
+            <form id="switchUserForm" class="space-y-4">
+                <input type="hidden" id="switchUsernameInput">
+                <div><input type="password" id="switchPasswordInput" placeholder="Password" required
+                        class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none transition-all border-gray-700 focus:border-accent-primary">
+                </div>
+                <button type="submit"
+                    class="w-full py-3 rounded-xl bg-accent-primary text-white font-bold shadow-lg shadow-accent-primary/20 hover:shadow-accent-primary/40 hover:-translate-y-0.5 transition-all">Login
+                    & Switch</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="userModal" class="fixed inset-0 z-[60] hidden transition-opacity duration-300 opacity-0">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
+            onclick="closeUserModal()"></div>
+        <div class="absolute inset-y-0 right-0 w-full max-w-md bg-[#121212] border-l border-gray-800 shadow-2xl transform transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1) translate-x-full flex flex-col"
+            id="userModalContent">
+            <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#1a1a1a]">
+                <h2 class="text-2xl font-bold text-white" id="modalTitle">My Profile</h2>
+                <button onclick="closeUserModal()"
+                    class="text-gray-400 hover:text-white hover:rotate-90 transition-all duration-300"><svg
+                        class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="flex justify-center mb-6">
+                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-accent-primary/20 shadow-xl">
+                        <img id="modalAvatarPreview" src="" alt="Profile"
+                            class="w-full h-full object-cover bg-gray-800">
+                    </div>
+                </div>
+                <div
+                    class="bg-[#1a1a1a] rounded-xl p-6 mb-8 border border-gray-800 transition-all hover:border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4 text-accent-primary">Profile Details</h3>
+                    <form id="userForm" class="space-y-4">
+                        <input type="hidden" id="modalUserId">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-gray-400 mb-1">Username</label><input type="text"
+                                    id="modalUsername"
+                                    class="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 focus:border-accent-primary focus:outline-none text-gray-200 transition-colors">
+                            </div>
+                            <div><label class="block text-xs text-gray-400 mb-1">Email</label><input type="email"
+                                    id="modalEmail"
+                                    class="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 focus:border-accent-primary focus:outline-none text-gray-200 transition-colors">
+                            </div>
+                            <div><label class="block text-xs text-gray-400 mb-1">Age</label><input type="number"
+                                    id="modalAge"
+                                    class="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 focus:border-accent-primary focus:outline-none text-gray-200 transition-colors">
+                            </div>
+                            <div><label class="block text-xs text-gray-400 mb-1">Contact</label><input type="text"
+                                    id="modalContact"
+                                    class="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 focus:border-accent-primary focus:outline-none text-gray-200 transition-colors">
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="submit"
+                                class="px-4 py-2 rounded-lg bg-accent-primary hover:bg-indigo-500 text-white text-sm font-medium transition-all shadow-lg shadow-accent-primary/20 hover:shadow-accent-primary/40 hover:-translate-y-0.5">Save
+                                Changes</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="userNewsSection">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-white">My Stories</h3>
+                    </div>
+                    <div id="userNewsList" class="space-y-3"></div>
+                </div>
+                <div id="newsFormSection"
+                    class="hidden bg-[#1a1a1a] rounded-xl p-6 border border-gray-800 mt-4 animate-entry">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-accent-secondary" id="newsFormTitle">Write Story</h3>
+                        <button onclick="closeNewsForm()"
+                            class="text-xs text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    </div>
+                    <form id="newsForm" class="space-y-4">
+                        <input type="hidden" id="newsId">
+                        <div><input type="text" id="newsTitle" placeholder="Title"
+                                class="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 font-bold focus:border-accent-secondary focus:outline-none text-white transition-colors">
+                        </div>
+                        <div><textarea id="newsBody" rows="5" placeholder="Tell your story..."
+                                class="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 focus:border-accent-secondary focus:outline-none text-gray-300 transition-colors"></textarea>
+                        </div>
+                        <button type="submit"
+                            class="w-full py-2 rounded-lg bg-accent-secondary hover:bg-purple-500 text-white font-medium transition-all shadow-lg shadow-accent-secondary/20 hover:shadow-accent-secondary/40">Publish</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="readModal" class="fixed inset-0 z-[70] hidden transition-all duration-500">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md opacity-0 transition-opacity duration-500"
+            id="readOverlay" onclick="closeReadModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="glass w-full max-w-3xl max-h-[90vh] rounded-2xl border border-white/10 shadow-2xl flex flex-col pointer-events-auto transform transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) scale-90 opacity-0 overflow-hidden"
+                id="readModalContent">
+                <div
+                    class="h-64 bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 relative flex items-end p-8 transition-all duration-700 group">
+                    <button onclick="closeReadModal()"
+                        class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all z-20 backdrop-blur-sm hover:scale-110">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div class="w-full relative z-10 translate-y-4 transition-transform duration-500"
+                        id="readHeaderContent">
+                        <span
+                            class="bg-accent-primary/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block shadow-lg">News</span>
+                        <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight drop-shadow-lg"
+                            id="readTitle">News Title</h2>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent"></div>
+                </div>
+                <div class="p-8 overflow-y-auto bg-[#121212] flex-1">
+                    <div class="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full overflow-hidden border border-gray-600">
+                                <img id="readAvatar" src="" class="w-full h-full object-cover">
+                            </div>
+                            <p class="text-xs text-gray-500 font-mono" id="readDate">Date</p>
+                        </div>
+                    </div>
+                    <div class="prose prose-invert max-w-none text-gray-300 leading-relaxed text-lg" id="readBody">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let users = [];
+        let news = [];
+        let currentFilter = 'All';
+        const currentUserId = {{ current_user.id if current_user.is_authenticated else 'null' }};
+        const currentUserName = "{{ current_user.username if current_user.is_authenticated else 'Guest' }}";
+
+        // --- AVATAR HELPER (Using Notionists Style - No Gender Support in API) ---
+        function getAvatarUrl(username, gender) {
+            return `https://api.dicebear.com/7.x/notionists/svg?seed=${username}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf,ffd5dc`;
+        }
+
+        // --- FIX: SEQUENTIAL LOADING TO PREVENT RACE CONDITION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (currentUserId) {
+                await fetchUsers(); // Users first
+                await fetchNews();  // Then News (so news can map to users)
+            }
+        });
+
+        async function logout() { await api('/auth/logout', 'POST'); window.location.reload(); }
+        async function api(endpoint, method = 'GET', body = null) {
+            try {
+                const opts = { method, headers: { 'Content-Type': 'application/json' } };
+                if (body) opts.body = JSON.stringify(body);
+                const res = await fetch(`/api${endpoint}`, opts);
+                if (res.status === 401) { window.location.reload(); return null; }
+                return res.json();
+            } catch (err) { console.error(err); return { error: err.message }; }
+        }
+
+        async function fetchUsers() {
+            const data = await api('/users');
+            if (data && !data.error) {
+                users = data;
+                renderUsers();
+                const me = users.find(u => u.user_id === currentUserId);
+                if (me) {
+                    document.getElementById('navbarAvatar').src = getAvatarUrl(me.username, me.gender);
+                }
+            }
+        }
+
+        async function fetchNews(isPolling = false) {
+            const data = await api('/news');
+            if (data && !data.error) {
+                news = data;
+                if (isPolling) {
+                    updateImagesOnly();
+                } else {
+                    renderNews();
+                }
+
+                // POLLING LOGIC: Check if any recent news (last 2 mins) has no image
+                const now = new Date();
+                const needsUpdate = news.some(n => {
+                    const created = new Date(n.created_at);
+                    const ageInSeconds = (now - created) / 1000;
+                    return !n.image_url && ageInSeconds < 120; // Poll for 2 minutes max
+                });
+
+                if (needsUpdate) {
+                    console.log("Polling for images...");
+                    setTimeout(() => fetchNews(true), 4000); // Retry every 4 seconds
+                }
+            }
+        }
+
+        function updateImagesOnly() {
+            news.forEach(n => {
+                if (n.image_url) {
+                    // Update Grid Item
+                    const gridEl = document.getElementById(`grid-img-${n.news_id}`);
+                    if (gridEl && gridEl.querySelector('.animate-spin')) { // Only update if currently showing spinner
+                        gridEl.innerHTML = `
+                            <img src="${n.image_url}" class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110" alt="${n.title}">
+                            <div class="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-[#141414] to-transparent"></div>
+                            <span class="absolute top-4 left-4 z-10 bg-black/40 backdrop-blur-md border border-white/10 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded text-white shadow-lg">News</span>
+                        `;
+                    }
+
+                    // Update Story Item
+                    const storyEl = document.getElementById(`story-img-${n.news_id}`);
+                    if (storyEl && !storyEl.querySelector('img.story-bg')) { // Only update if no image yet
+                        storyEl.innerHTML = `<img src="${n.image_url}" class="story-bg w-full h-full object-cover" alt="story">`;
+                    }
+                }
+            });
+        }
+
+        function renderUsers() {
+            const list = document.getElementById('userList');
+            list.innerHTML = users.map(u => {
+                const isMe = u.username === currentUserName;
+                const safeUser = u.username.replace(/'/g, "\\'");
+                const safeGender = (u.gender || 'male').replace(/'/g, "\\'");
+
+                const clickAction = isMe ? `openUserModal(${u.user_id})` : `promptSwitchUser('${safeUser}', '${safeGender}')`;
+                const activeClass = isMe ? 'bg-white/5 border-accent-primary/20 shadow-[0_0_15px_-5px_rgba(99,102,241,0.3)]' : 'border-transparent hover:border-white/5';
+
+                return `
+                <div onclick="${clickAction}" 
+                     class="p-3 rounded-xl hover:bg-white/10 cursor-pointer transition-all duration-300 hover:scale-[1.02] flex items-center gap-3 border ${activeClass} group relative">
+                    <div class="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-white/10 group-hover:border-accent-primary transition-colors">
+                        <img src="${getAvatarUrl(u.username, u.gender)}" class="w-full h-full object-cover" alt="${u.username}">
+                    </div>
+                    <div class="overflow-hidden flex-1">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-sm font-medium text-gray-200 truncate group-hover:text-white transition-colors">${u.username}</h4>
+                            ${isMe ? '<span class="text-[10px] bg-accent-primary text-white font-bold px-1.5 py-0.5 rounded shadow-sm">You</span>' : ''}
+                        </div>
+                        <p class="text-xs text-gray-500 truncate">Member</p>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function promptSwitchUser(username, gender) {
+            const modal = document.getElementById('switchUserModal');
+            document.getElementById('switchTargetUser').innerText = username;
+            document.getElementById('switchUsernameInput').value = username;
+            document.getElementById('switchUserAvatar').src = getAvatarUrl(username, gender);
+            document.getElementById('switchPasswordInput').value = '';
+
+            modal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('switchPasswordInput').focus(), 100);
+        }
+
+        function closeSwitchModal() {
+            document.getElementById('switchUserModal').classList.add('hidden');
+        }
+
+        document.getElementById('switchUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('switchUsernameInput').value;
+            const password = document.getElementById('switchPasswordInput').value;
+
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Switching...';
+            btn.disabled = true;
+
+            const res = await api('/auth/login', 'POST', { username, password });
+            if (res && !res.error) {
+                window.location.reload();
+            } else {
+                alert(res?.error || 'Switch failed. Incorrect password.');
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        function renderNews() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const storiesReel = document.getElementById('storiesReel');
+            const feed = document.getElementById('newsFeed');
+
+            let filteredNews = news.filter(n => n.title.toLowerCase().includes(query) || n.body.toLowerCase().includes(query));
+
+            if (currentFilter !== 'All') {
+                filteredNews = filteredNews.filter(n => {
+                    const text = (n.title + ' ' + n.body).toLowerCase();
+                    if (currentFilter === 'Tech') return /python|sql|flask|ai|data|tech/.test(text);
+                    if (currentFilter === 'Design') return /design|css|web|ui|ux/.test(text);
+                    return true;
+                });
+            }
+
+            const me = users.find(u => u.user_id === currentUserId);
+            const myGender = me ? me.gender : 'male';
+
+            let storiesHTML = `
+                <div onclick="openCreateStoryTrigger()" class="story-card create-story-card group">
+                    <div class="create-story-img-container">
+                        <img src="${getAvatarUrl(currentUserName, myGender)}" alt="Me">
+                    </div>
+                    <div class="create-btn-area">
+                        <div class="plus-icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                        </div>
+                        <span class="text-white text-xs font-bold">Create Story</span>
+                    </div>
+                </div>
+            `;
+
+            const storiesData = filteredNews.slice(0, 8);
+            storiesHTML += storiesData.map((n, i) => {
+                let seed = n.title;
+                let gender = 'male';
+                if (n.user_id) {
+                    const author = users.find(u => u.user_id === n.user_id);
+                    if (author) {
+                        seed = author.username;
+                        gender = author.gender;
+                    }
+                }
+
+                return `
+                <div onclick="openReadModal(${n.news_id})" 
+                     class="story-card group animate-entry" 
+                     style="animation-delay: ${i * 0.05}s">
+                    <div id="story-img-${n.news_id}" class="absolute inset-0 bg-gray-800">
+                        ${n.image_url
+                        ? `<img src="${n.image_url}" class="story-bg w-full h-full object-cover" alt="story">`
+                        : `<div class="w-full h-full bg-gradient-to-b from-gray-700 to-gray-900 flex items-center justify-center"><svg class="w-8 h-8 text-white/20 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>`
+                    }
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute top-3 left-3 w-8 h-8 rounded-full border-2 border-accent-primary bg-gray-900 overflow-hidden z-10 shadow-md">
+                        <img src="${getAvatarUrl(seed, gender)}" class="w-full h-full object-cover">
+                    </div>
+                    <p class="absolute bottom-3 left-3 right-3 text-white text-xs font-bold leading-tight line-clamp-2 drop-shadow-md group-hover:text-accent-primary transition-colors">${n.title}</p>
+                </div>
+            `}).join('');
+
+            storiesReel.innerHTML = storiesHTML;
+            renderGrid(filteredNews, 0.3);
+        }
+
+        function renderGrid(items, startDelay) {
+            const feed = document.getElementById('newsFeed');
+            if (items.length === 0) {
+                feed.innerHTML = '<div class="col-span-full text-center py-20 text-gray-500">No stories found.</div>';
+                return;
+            }
+            feed.innerHTML = items.map((n, index) => {
+                let seed = n.title;
+                let gender = 'male';
+                if (n.user_id) {
+                    const author = users.find(u => u.user_id === n.user_id);
+                    if (author) {
+                        seed = author.username;
+                        gender = author.gender;
+                    }
+                }
+
+                return `
+                <div onclick="openReadModal(${n.news_id})" 
+                     class="glass-card rounded-2xl overflow-hidden flex flex-col h-full cursor-pointer group relative animate-entry"
+                     style="animation-delay: ${startDelay + (index * 0.05)}s">
+                    <div id="grid-img-${n.news_id}" class="h-48 bg-gray-800 relative overflow-hidden">
+                        ${n.image_url
+                        ? `<img src="${n.image_url}" class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110" alt="${n.title}">`
+                        : `<div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex flex-col items-center justify-center gap-2">
+                             <div class="w-8 h-8 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin"></div>
+                             <span class="text-xs text-accent-primary font-bold animate-pulse">Generating Magic...</span>
+                           </div>`
+                    }
+                        <div class="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-[#141414] to-transparent"></div>
+                        <span class="absolute top-4 left-4 z-10 bg-black/40 backdrop-blur-md border border-white/10 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded text-white shadow-lg">News</span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col relative z-10 -mt-6">
+                        <h3 class="text-lg font-bold text-white mb-2 leading-tight group-hover:text-accent-primary transition-colors drop-shadow-md line-clamp-2">${n.title}</h3>
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-3 flex-1 transition-colors group-hover:text-gray-300">${n.body}</p>
+                        <div class="flex items-center gap-2 pt-4 border-t border-white/5">
+                            <div class="w-5 h-5 rounded-full overflow-hidden">
+                                <img src="${getAvatarUrl(seed, gender)}" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-xs text-gray-500 font-medium">${new Date(n.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            ['All', 'Tech', 'Design'].forEach(f => {
+                const btn = document.getElementById(`btn-${f}`);
+                if (f === filter) btn.className = "px-4 py-1.5 rounded-full bg-accent-primary/20 text-accent-primary text-xs font-bold border border-accent-primary/20 transition-all duration-300 active:scale-95 backdrop-blur-md shadow-lg shadow-accent-primary/10";
+                else btn.className = "px-4 py-1.5 rounded-full glass text-gray-400 text-xs font-bold border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 active:scale-95";
+            });
+            renderNews();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderNews);
+
+        const readModal = document.getElementById('readModal');
+        const readContent = document.getElementById('readModalContent');
+        const readOverlay = document.getElementById('readOverlay');
+
+        function openReadModal(newsId) {
+            const item = news.find(n => n.news_id === newsId);
+            if (!item) return;
+
+            let seed = item.title;
+            let gender = 'male';
+            if (item.user_id) {
+                const author = users.find(u => u.user_id === item.user_id);
+                if (author) {
+                    seed = author.username;
+                    gender = author.gender;
+                }
+            }
+
+            const headerDiv = document.querySelector('#readModalContent > div:first-child');
+            if (item.image_url) {
+                headerDiv.style.backgroundImage = `url('${item.image_url}')`;
+                headerDiv.style.backgroundSize = 'cover';
+                headerDiv.style.backgroundPosition = 'center';
+                headerDiv.classList.remove('bg-gradient-to-r');
+            } else {
+                headerDiv.style.backgroundImage = 'none';
+                headerDiv.classList.add('bg-gradient-to-r');
+            }
+
+            document.getElementById('readTitle').innerText = item.title;
+            document.getElementById('readBody').innerText = item.body;
+            document.getElementById('readDate').innerText = new Date(item.created_at).toLocaleDateString();
+            document.getElementById('readAvatar').src = getAvatarUrl(seed, gender);
+
+            readModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                readOverlay.classList.remove('opacity-0');
+                readContent.classList.remove('scale-90', 'opacity-0');
+                readContent.classList.add('scale-100', 'opacity-100');
+                document.getElementById('readHeaderContent').classList.remove('translate-y-4');
+            });
+        }
+
+        function closeReadModal() {
+            readContent.classList.remove('scale-100', 'opacity-100');
+            readContent.classList.add('scale-90', 'opacity-0');
+            readOverlay.classList.add('opacity-0');
+            document.getElementById('readHeaderContent').classList.add('translate-y-4');
+            setTimeout(() => readModal.classList.add('hidden'), 500);
+        }
+
+        const modal = document.getElementById('userModal');
+        const modalContent = document.getElementById('userModalContent');
+
+        async function openCreateStoryTrigger() {
+            await openUserModal(currentUserId);
+            openNewsForm();
+        }
+
+        async function openUserModal(userId) {
+            if (userId !== currentUserId) return;
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('translate-x-full');
+            });
+
+            const user = users.find(u => u.user_id === userId);
+            if (!user) return;
+            document.getElementById('modalUserId').value = userId;
+            document.getElementById('modalUsername').value = user.username;
+            document.getElementById('modalEmail').value = user.email;
+            document.getElementById('modalAge').value = user.age;
+            document.getElementById('modalContact').value = user.contact_number;
+            document.getElementById('modalAvatarPreview').src = getAvatarUrl(user.username, user.gender);
+
+            const userNews = await api(`/users/${userId}/news`);
+            if (userNews) renderUserNews(userNews);
+            closeNewsForm();
+        }
+
+        function closeUserModal() {
+            modalContent.classList.add('translate-x-full');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 500);
+        }
+
+        function renderUserNews(userNews) {
+            const list = document.getElementById('userNewsList');
+            if (!userNews || userNews.length === 0) { list.innerHTML = '<p class="text-sm text-gray-500 italic">No stories yet.</p>'; return; }
+            list.innerHTML = userNews.map((n, i) => `
+                <div class="bg-[#262626] p-3 rounded-lg border border-gray-700 flex justify-between items-start group hover:border-accent-primary/50 transition-colors animate-entry" style="animation-delay: ${i * 0.05}s">
+                    <div>
+                        <h5 class="font-bold text-sm text-gray-200 group-hover:text-white transition-colors">${n.title}</h5>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-1">${n.body}</p>
+                    </div>
+                    <div class="flex gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editNews(${n.news_id}, '${n.title.replace(/'/g, "\\'")}', '${n.body.replace(/'/g, "\\'")}')" class="text-gray-400 hover:text-accent-primary transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+                        <button onclick="deleteNews(${n.news_id})" class="text-gray-400 hover:text-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('modalUserId').value;
+            const data = {
+                username: document.getElementById('modalUsername').value,
+                email: document.getElementById('modalEmail').value,
+                age: document.getElementById('modalAge').value,
+                contact_number: document.getElementById('modalContact').value
+            };
+            await api(`/users/${id}`, 'PUT', data);
+            closeUserModal();
+            fetchUsers();
+            window.location.reload();
+        });
+
+        function openNewsForm() {
+            document.getElementById('newsFormSection').classList.remove('hidden');
+            document.getElementById('newsFormTitle').innerText = 'Write Story';
+            document.getElementById('newsForm').reset();
+            document.getElementById('newsId').value = '';
+            document.querySelector('#userModalContent .overflow-y-auto').scrollTop = 1000;
+        }
+        function closeNewsForm() { document.getElementById('newsFormSection').classList.add('hidden'); }
+        function editNews(id, title, body) {
+            openNewsForm();
+            document.getElementById('newsFormTitle').innerText = 'Edit Story';
+            document.getElementById('newsId').value = id;
+            document.getElementById('newsTitle').value = title;
+            document.getElementById('newsBody').value = body;
+        }
+
+        document.getElementById('newsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newsId = document.getElementById('newsId').value;
+            const data = { title: document.getElementById('newsTitle').value, body: document.getElementById('newsBody').value };
+            if (newsId) await api(`/news/${newsId}`, 'PUT', data);
+            else await api('/news', 'POST', data);
+            closeNewsForm();
+            const userNews = await api(`/users/${currentUserId}/news`);
+            if (userNews) renderUserNews(userNews);
+            fetchNews();
+        });
+
+        async function deleteNews(id) {
+            if (!confirm("Delete this story?")) return;
+            await api(`/news/${id}`, 'DELETE');
+            const userNews = await api(`/users/${currentUserId}/news`);
+            if (userNews) renderUserNews(userNews);
+            fetchNews();
+        }
+
+        function toggleUserTray() {
+            const sidebar = document.getElementById('userSidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('userSidebar');
+            const toggleBtn = document.getElementById('toggleTrayBtn');
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) sidebar.classList.add('-translate-x-full');
+            }
+        });
+    </script>
+</body>
+
+</html>

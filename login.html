@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAUU News Portal - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], bear: ['Fredoka', 'sans-serif'] },
+                    colors: {
+                        dark: { bg: '#0a0a0a', card: '#171717', input: '#262626' },
+                        accent: { primary: '#6366f1', secondary: '#8b5cf6' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.3;
+            animation: float 20s infinite cubic-bezier(0.4, 0, 0.2, 1) alternate;
+        }
+
+        body::before {
+            background: #4f46e5;
+            top: -10%;
+            left: -10%;
+        }
+
+        body::after {
+            background: #9333ea;
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(40px, 40px) rotate(5deg);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-entry {
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .glass-input:focus {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+        }
+
+        select.glass-input option {
+            background-color: #171717;
+            color: white;
+        }
+
+        /* Bear Animation */
+        .bear-container {
+            width: 220px;
+            height: 190px;
+            position: relative;
+            margin: 0 auto;
+            margin-bottom: -50px;
+            z-index: 1;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .bear-hidden {
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            height: 0;
+            margin-bottom: 0;
+        }
+
+        svg.bear-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .eye-group,
+        .pupil,
+        .muzzle-group {
+            transform-origin: center;
+            transition: transform 0.2s;
+        }
+
+        .ear {
+            transform-origin: bottom center;
+            animation: twitch 6s infinite alternate;
+        }
+
+        .hand {
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .bear-container.blindfold .hand-l {
+            transform: translateY(-135px) translateX(10px) rotate(-15deg);
+        }
+
+        .bear-container.blindfold .hand-r {
+            transform: translateY(-135px) translateX(-10px) rotate(15deg);
+        }
+
+        .bear-container.blindfold .eye-group {
+            transform: translateY(-5px);
+        }
+
+        .bear-container.looking .hand {
+            transform: translateY(0);
+        }
+
+        @keyframes twitch {
+
+            0%,
+            90% {
+                transform: rotate(0deg);
+            }
+
+            95% {
+                transform: rotate(3deg);
+            }
+
+            100% {
+                transform: rotate(-3deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-accent-primary selection:text-white">
+
+    <div class="relative flex flex-col items-center w-full max-w-md transition-all duration-500">
+
+        <div class="bear-container animate-entry" id="bearBox">
+            <svg class="bear-svg" viewBox="0 0 300 240">
+                <defs>
+                    <clipPath id="body-clip">
+                        <rect x="0" y="0" width="300" height="240" />
+                    </clipPath>
+                </defs>
+                <path d="M60,240 C60,200 80,180 150,180 C220,180 240,200 240,240" fill="#eef4f9" />
+                <g class="ear" style="transform-origin: 75px 60px;">
+                    <circle cx="75" cy="60" r="28" fill="#eef4f9" />
+                    <circle cx="75" cy="60" r="16" fill="#e1e8ed" />
+                </g>
+                <g class="ear" style="transform-origin: 225px 60px; animation-delay: 2s;">
+                    <circle cx="225" cy="60" r="28" fill="#eef4f9" />
+                    <circle cx="225" cy="60" r="16" fill="#e1e8ed" />
+                </g>
+                <path
+                    d="M50,110 C50,50 90,20 150,20 C210,20 250,50 250,110 C250,160 210,185 150,185 C90,185 50,160 50,110"
+                    fill="#eef4f9" />
+                <path d="M135,22 Q150,5 165,22" stroke="#eef4f9" stroke-width="5" fill="none" stroke-linecap="round" />
+                <g class="face-features">
+                    <g id="eyebrows">
+                        <path d="M95,65 Q110,55 125,65" stroke="#2b3044" stroke-width="4" fill="none"
+                            stroke-linecap="round" opacity="0.8" />
+                        <path d="M175,65 Q190,55 205,65" stroke="#2b3044" stroke-width="4" fill="none"
+                            stroke-linecap="round" opacity="0.8" />
+                    </g>
+                    <g class="eye-group" id="eye-group">
+                        <ellipse cx="110" cy="90" rx="14" ry="16" fill="#2b3044" />
+                        <circle class="pupil" cx="114" cy="86" r="3" fill="white" />
+                        <ellipse cx="190" cy="90" rx="14" ry="16" fill="#2b3044" />
+                        <circle class="pupil" cx="194" cy="86" r="3" fill="white" />
+                    </g>
+                    <g class="muzzle-group" id="muzzle">
+                        <ellipse cx="150" cy="125" rx="55" ry="38" fill="#ffffff" />
+                        <path d="M135,115 Q150,110 165,115 Q165,115 158,128 Q150,132 142,128 Q135,115 135,115"
+                            fill="#2b3044" />
+                        <path id="mouth" d="M135,145 Q150,155 165,145" stroke="#2b3044" stroke-width="4" fill="none"
+                            stroke-linecap="round" />
+                    </g>
+                </g>
+                <path d="M70,170 Q150,210 230,170 L230,190 Q150,230 70,190 Z" fill="#a82046" />
+                <path d="M70,170 Q150,210 230,170" stroke="#8a1a39" stroke-width="2" fill="none" />
+                <g class="hands">
+                    <g class="hand hand-l" style="transform-origin: 50% 100%;">
+                        <path d="M60,280 L60,220 Q60,190 90,190 Q120,190 120,220 L120,280 Z" fill="#eef4f9"
+                            stroke="#cbd5e1" stroke-width="2" />
+                        <path d="M80,190 L80,205 M90,188 L90,205 M100,190 L100,205" stroke="#cbd5e1" stroke-width="2"
+                            stroke-linecap="round" />
+                    </g>
+                    <g class="hand hand-r" style="transform-origin: 50% 100%;">
+                        <path d="M180,280 L180,220 Q180,190 210,190 Q240,190 240,220 L240,280 Z" fill="#eef4f9"
+                            stroke="#cbd5e1" stroke-width="2" />
+                        <path d="M200,190 L200,205 M210,188 L210,205 M220,190 L220,205" stroke="#cbd5e1"
+                            stroke-width="2" stroke-linecap="round" />
+                    </g>
+                </g>
+            </svg>
+        </div>
+
+        <div class="glass w-full p-8 rounded-2xl relative overflow-hidden animate-entry z-20"
+            style="animation-delay: 0.15s;">
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-accent-primary/20 rounded-full blur-3xl animate-pulse">
+            </div>
+            <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-accent-secondary/20 rounded-full blur-3xl animate-pulse"
+                style="animation-delay: 1s;"></div>
+
+            <div class="relative z-10">
+                <div class="text-center mb-8 animate-entry" style="animation-delay: 0.2s;">
+                    <div class="flex items-center justify-center gap-3 mb-4 group cursor-default">
+                        <img src="/static/logo.png" alt="NAUU Logo"
+                            class="w-16 h-16 rounded-xl shadow-lg shadow-accent-primary/20 hover:scale-105 transition-transform duration-300">
+                        <h1 class="text-4xl font-bold text-white tracking-tight">NAUU <span
+                                class="text-accent-primary">News</span></h1>
+                    </div>
+                    <p class="text-gray-400 text-sm font-medium">Please sign in to continue</p>
+                </div>
+
+                <form id="loginForm" class="space-y-4 animate-entry" style="animation-delay: 0.3s;">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 ml-1">Username</label>
+                        <input type="text" id="loginUsername" required
+                            class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none placeholder-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 ml-1">Password</label>
+                        <input type="password" id="loginPassword" required
+                            class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none placeholder-gray-600">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-3 rounded-xl bg-gradient-to-r from-accent-primary to-accent-secondary text-white font-bold shadow-lg shadow-accent-primary/25 hover:shadow-accent-primary/50 hover:-translate-y-0.5 transition-all">
+                        Sign In
+                    </button>
+                    <p class="text-center text-xs text-gray-400 mt-4">
+                        Don't have an account? <a href="#" onclick="toggleAuthMode(); return false;"
+                            class="text-accent-primary font-medium hover:text-accent-secondary transition-colors">Register
+                            now</a>
+                    </p>
+                </form>
+
+                <form id="registerForm" class="space-y-4 hidden animate-entry">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 ml-1">Username</label>
+                            <input type="text" id="regUsername" required
+                                class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 ml-1">Email</label>
+                            <input type="email" id="regEmail" required
+                                class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 ml-1">Password</label>
+                        <input type="password" id="regPassword" required
+                            class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 ml-1">Gender</label>
+                            <select id="regGender"
+                                class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none cursor-pointer">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 ml-1">Age</label>
+                            <input type="number" id="regAge"
+                                class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1 ml-1">Contact</label>
+                        <input type="text" id="regContact"
+                            class="w-full glass-input rounded-xl px-4 py-3 text-white focus:outline-none">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-3 rounded-xl bg-gradient-to-r from-accent-secondary to-accent-primary text-white font-bold shadow-lg shadow-accent-secondary/25 hover:shadow-accent-secondary/50 hover:-translate-y-0.5 transition-all">
+                        Create Account
+                    </button>
+                    <p class="text-center text-xs text-gray-400 mt-4">
+                        Already have an account? <a href="#" onclick="toggleAuthMode(); return false;"
+                            class="text-accent-primary font-medium hover:text-accent-secondary transition-colors">Sign
+                            In</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BEAR LOGIC ---
+        const bearContainer = document.getElementById('bearBox');
+        const loginUsername = document.getElementById('loginUsername');
+        const loginPassword = document.getElementById('loginPassword');
+        const eyeGroup = document.getElementById('eye-group');
+        const muzzle = document.getElementById('muzzle');
+
+        if (loginUsername && bearContainer) {
+            loginUsername.addEventListener('focus', () => {
+                bearContainer.classList.remove('blindfold');
+                bearContainer.classList.add('looking');
+            });
+            loginUsername.addEventListener('blur', () => {
+                bearContainer.classList.remove('looking');
+                resetFace();
+            });
+            loginUsername.addEventListener('input', (e) => {
+                const val = e.target.value.length;
+                let mapVal = Math.min(val, 30);
+                let translateVal = (mapVal / 30) * 20 - 10;
+                eyeGroup.style.transform = `translateX(${translateVal}px) translateY(5px)`;
+                muzzle.style.transform = `translateX(${translateVal / 2}px)`;
+            });
+        }
+
+        if (loginPassword && bearContainer) {
+            loginPassword.addEventListener('focus', () => {
+                bearContainer.classList.add('blindfold');
+                bearContainer.classList.remove('looking');
+                resetFace();
+            });
+            loginPassword.addEventListener('blur', () => {
+                bearContainer.classList.remove('blindfold');
+            });
+        }
+
+        function resetFace() {
+            if (eyeGroup) eyeGroup.style.transform = 'translateX(0) translateY(0)';
+            if (muzzle) muzzle.style.transform = 'translateX(0)';
+        }
+
+        // --- AUTH LOGIC ---
+        function toggleAuthMode() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const bearBox = document.getElementById('bearBox');
+
+            if (loginForm.classList.contains('hidden')) {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                bearBox.classList.remove('bear-hidden');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                bearBox.classList.add('bear-hidden');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const res = await api('/auth/login', 'POST', { username, password });
+            if (res && !res.error) window.location.href = '/';
+            else alert(res?.error || 'Login failed');
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('regUsername').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                // Passing gender. If backend rejects it, it might cause error.
+                gender: document.getElementById('regGender').value,
+                age: document.getElementById('regAge').value,
+                contact_number: document.getElementById('regContact').value
+            };
+            const res = await api('/auth/register', 'POST', data);
+            if (res && !res.error) window.location.href = '/';
+            else alert(res?.error || 'Registration failed');
+        });
+
+        async function api(endpoint, method = 'GET', body = null) {
+            try {
+                const opts = { method, headers: { 'Content-Type': 'application/json' } };
+                if (body) opts.body = JSON.stringify(body);
+                const res = await fetch(`/api${endpoint}`, opts);
+                if (res.status === 401) return { error: 'Invalid credentials' };
+                return res.json();
+            } catch (err) { return { error: err.message }; }
+        }
+    </script>
+</body>
+
+</html>
