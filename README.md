@@ -11,6 +11,11 @@ A modern, Flask-based news portal application featuring user management, real-ti
 -   **Search & Filter**: Filter news by categories (Tech, Design) and search for stories or users.
 -   **Interactive Interface**: Modal-based interactions for reading news and managing profiles.
 
+### System Workflow
+The diagram below illustrates how the backend manages news submission and asynchronous AI image generation.
+
+![System Workflow Sequence Diagram](Untitled%20diagram-2025-11-26-195928.jpg)
+
 ## Technology Stack
 
 -   **Backend**: Python, Flask
@@ -38,6 +43,11 @@ A modern, Flask-based news portal application featuring user management, real-ti
     ```
 
 3.  **Database Setup:**
+    
+    The application uses a relational database to manage Users and News. Refer to the ER diagram below for the schema structure:
+
+    ![Database ER Diagram](Untitled%20diagram-2025-11-27-033350.png)
+
     -   Ensure your MySQL server is running (default configuration expects XAMPP on port 3307).
     -   Create a database named `news_blog_db`.
     -   Import the necessary tables. You can use the provided `database_setup.py` script if available, or manually create the tables:
