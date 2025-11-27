@@ -14,7 +14,9 @@ A modern, Flask-based news portal application featuring user management, real-ti
 ### System Workflow
 The diagram below illustrates how the backend manages news submission and asynchronous AI image generation.
 
-![System Workflow Sequence Diagram]("C:\Users\imtia\Downloads\Untitled diagram-2025-11-26-195928.png")
+![System Workflow Sequence Diagram]<img width="2665" height="1888" alt="Untitled diagram-2025-11-26-195928" src="https://github.com/user-attachments/assets/3114a491-9d2a-42d2-a89e-396f05ce75e9" />
+
+
 
 ## Technology Stack
 
@@ -46,7 +48,8 @@ The diagram below illustrates how the backend manages news submission and asynch
     
     The application uses a relational database to manage Users and News. Refer to the ER diagram below for the schema structure:
 
-    ![Database ER Diagram]"C:\Users\imtia\Downloads\Untitled diagram-2025-11-27-033350.png")
+    ![Database ER Diagram]"<img width="1181" height="1594" alt="Untitled diagram-2025-11-27-033350" src="https://github.com/user-attachments/assets/f850762c-849d-47b9-83e5-ed5d5390c97a" />
+
 
     -   Ensure your MySQL server is running (default configuration expects XAMPP on port 3307).
     -   Create a database named `news_blog_db`.
@@ -110,4 +113,5 @@ The diagram below illustrates how the backend manages news submission and asynch
 -   `templates/index.html`: Single-page frontend application.
 -   `static/`: Directory for storing generated images and other static assets.
 -   `check_db.py` & `database_setup.py`: Utility scripts for database management.
+
 
